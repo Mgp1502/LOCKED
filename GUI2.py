@@ -23,7 +23,6 @@ class mainWindow(wx.Frame):
     data = []
     savedPath = ''
     name = "main"
-
     def __init__(self):
         self.instance = wx.SingleInstanceChecker(self.name)
         if self.instance.IsAnotherRunning():
@@ -38,7 +37,9 @@ class mainWindow(wx.Frame):
         self.button1.Bind(wx.EVT_BUTTON, self.find_characters)
 
         self.track_label = wx.StaticText(self, pos=(10, 20), label="Select your WoW directory:")
-        self.dirPicker = wx.DirPickerCtrl(self,  pos=(10, 40), message="select WoW directory")
+        self.dirPicker = wx.DirPickerCtrl(self, size=(500, -1),  pos=(10, 40), message="select WoW directory")
+        self.dirPicker.TextCtrl.SetSize((400, -1))
+        self.dirPicker.PickerCtrl.SetPosition((410, 0))
 
         self.check_label = wx.StaticText(self, pos=(10, 120), label="Chars found in WoW directory:")
         self.checkList = wx.CheckListBox(self, size=(200, 250), pos=(10, 150), choices=self.info_strings)
@@ -66,7 +67,7 @@ class mainWindow(wx.Frame):
         # for each account in wow folder, find locked_out file and parse to extracting.
         folder_path = self.dirPicker.GetPath()
 
-        # TODO save path in json file,
+        # save path in json file,
         util.save_path(folder_path, save_file)
         folder_path = os.path.join(folder_path, "_retail_", "WTF", "Account")
 
@@ -83,8 +84,7 @@ class mainWindow(wx.Frame):
         self.info_strings = []
         self.data = []
         for path in locked_out_paths:
-            #TODO check for no duplicates of entries
-            self.data = self.data + lua_extracting.extract(path)
+            self.data = self.data.extend(lua_extracting.extract(path))
             for entry in self.data:
                 self.info_strings.append(entry[0] + ": " + entry[1] + " +" + str(entry[2]))
 
