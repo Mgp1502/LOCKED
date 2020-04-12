@@ -1,0 +1,1 @@
+pyinstaller --hidden-import slpp --hidden-import dns program.py
