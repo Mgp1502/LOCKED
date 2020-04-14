@@ -1,4 +1,4 @@
 SLPP
 wxPython
-mysql-connector
+requests
 pyinstaller

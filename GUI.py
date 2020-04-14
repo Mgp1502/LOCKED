@@ -20,7 +20,8 @@ def create_menu_item(menu, label, func):
 
 class mainWindow(wx.Frame):
     info_strings = []
-    data = []
+    data = {}
+    data_list = []
     savedPath = ''
     name = "main"
     def __init__(self):
@@ -42,7 +43,7 @@ class mainWindow(wx.Frame):
         self.dirPicker.PickerCtrl.SetPosition((410, 0))
 
         self.check_label = wx.StaticText(self, pos=(10, 120), label="Chars found in WoW directory:")
-        self.checkList = wx.CheckListBox(self, size=(200, 250), pos=(10, 150), choices=self.info_strings)
+        self.checkList = wx.CheckListBox(self, size=(300, 250), pos=(10, 150))
         # Load saved path from json and make default
         self.savedPath = util.load_path(save_file)
         if self.savedPath != "":
@@ -56,7 +57,7 @@ class mainWindow(wx.Frame):
         tracked_chars = util.load_chars(save_file)
 
         self.track_label = wx.StaticText(self, pos=(350, 120), label="Currently tracked chars:")
-        self.track_list = wx.ListBox(self, size=(200, 250), pos=(350, 150), choices=tracked_chars)
+        self.track_list = wx.ListBox(self, size=(300, 250), pos=(350, 150), choices=tracked_chars)
 
         self.Raise()
         self.Show(True)
@@ -74,21 +75,19 @@ class mainWindow(wx.Frame):
         locked_out_paths = []
 
         for dir in os.walk(folder_path):
-            if dir[0] == "SavedVariables":
-                continue
-            else:
-                locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "LockedOut.lua")
-                if os.path.exists(locked_out_file):
-                    locked_out_paths.append(locked_out_file)
+            locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "LockedOut.lua")
+            if os.path.exists(locked_out_file):
+                locked_out_paths.append(locked_out_file)
 
         self.info_strings = []
-        self.data = []
         for path in locked_out_paths:
-            self.data = self.data.extend(lua_extracting.extract(path))
-            for entry in self.data:
+            for res in lua_extracting.extract(path):
+                self.data[res[0]] = res
+            for entry in self.data.values():
                 self.info_strings.append(entry[0] + ": " + entry[1] + " +" + str(entry[2]))
 
-        self.checkList = wx.CheckListBox(self, pos=(10, 150), size=(200, 250), choices=self.info_strings)
+        self.data_list = list(self.data.values())
+        self.checkList = wx.CheckListBox(self, pos=(10, 150), size=(300, 250), choices=self.info_strings)
         print(self.dirPicker.GetPath())
 
     def save_selected(self, event):
@@ -96,12 +95,12 @@ class mainWindow(wx.Frame):
         items = self.checkList.GetCheckedItems()
         to_be_saved = []
         for item in items:
-            to_be_saved.append(self.data[item][0])
+            to_be_saved.append(self.data_list[item][0])
         # save in lua file.
         util.save_chars(to_be_saved, save_file)
         wx.MessageBox("Updated your tracked characters!", "Updated")
         self.track_list.Destroy()
-        self.track_list = wx.ListBox(self, size=(200, 250), pos=(350, 150), choices=to_be_saved)
+        self.track_list = wx.ListBox(self, size=(300, 250), pos=(350, 150), choices=to_be_saved)
 
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
@@ -133,7 +132,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
 
 class App(wx.App):
     def OnInit(self):
-        frame=wx.Frame(None)
+        frame = wx.Frame(None)
         self.SetTopWindow(frame)
         TaskBarIcon(frame)
         return True

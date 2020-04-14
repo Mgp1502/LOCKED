@@ -1,4 +1,4 @@
-import GUI2
+import GUI
 import background
 import threading
 
@@ -6,4 +6,4 @@ import threading
 t = threading.Thread(target=background.start, args=())
 t.daemon = True
 t.start()
-GUI2.main()
+GUI.main()
