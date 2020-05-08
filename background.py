@@ -34,9 +34,9 @@ def start():
 def insert_key(key):
     (name, dungeon, level) = key
     payload = {'name': name, 'dungeon': dungeon, 'level': level}
-    url = 'https://www.alpha-brawl.com/api/insertkey'
+    url = 'https://www.alpha-brawl.com/api/insertkey?code=coolhoot123'
     #header = {'Content-type': 'application/json', "User-Agent": "XY"}
-    header = {"User-Agent": "XY"}
+    header = {"User-Agent": "XY", "charset": "utf-8"}
     r = requests.post(url=url, data=payload, headers=header)
 
     print(r)

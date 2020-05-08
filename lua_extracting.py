@@ -12,7 +12,7 @@ def extract(path="LockedOutTest.lua", server="Twisting Nether", max_lvl=120, che
     :return: List of tuples containing (char_name, instance, key_level)
 
     """
-    f = open(path, "r")
+    f = open(path, "r", encoding="utf-8")
     next(f)  # skip first line
     code = f.read()
     # ignore first 12 chars to remove the "LockoutDb = "
