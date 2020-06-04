@@ -2,9 +2,9 @@ import requests
 import lua_extracting
 
 
-def insert_key(key, player):
+def post_key(key, player, highest_done):
     (name, dungeon, level) = key
-    payload = {'name': name, 'dungeon': dungeon, 'level': level, 'player': player}
+    payload = {'name': name, 'dungeon': dungeon, 'level': level, 'player': player, 'highest': highest_done}
     url = 'https://www.alpha-brawl.com/api/keys?code=coolhoot123'
     header = {"User-Agent": "XY", "charset": "utf-8"}
     r = requests.post(url=url, data=payload, headers=header)

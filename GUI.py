@@ -8,6 +8,7 @@ import background
 TRAY_TOOLTIP = 'L.O.C.K.E.D'
 TRAY_ICON = 'icon.png'
 SAVE_FILE = 'save_file.json'
+BACKGROUND_IMG = 'Vulpera.jpg'
 
 
 def create_menu_item(menu, label, func):
@@ -35,10 +36,9 @@ class mainWindow(wx.Frame):
         wx.Window.SetMaxSize(self, size=window_size)
 
         #=============BACKGROUND STUFF=============
-        img = wx.Image("Vulpera.jpg")
+        img = wx.Image(BACKGROUND_IMG)
         img = img.Scale(window_size[0], window_size[1], wx.IMAGE_QUALITY_HIGH)
         self.BgBitmap = wx.Bitmap(img)
-        #self.BgBitmap = wx.Bitmap("Vulpera.jpg")
 
         self.Bind(wx.EVT_ERASE_BACKGROUND, self._OnEraseBackground)
 
@@ -123,7 +123,7 @@ class mainWindow(wx.Frame):
 
         info_strings = []
         for path in locked_out_paths:
-            for res in lua_extracting.extract(path):
+            for res in lua_extracting.extractkeys(path):
                 self.data[res[0]] = res
             for entry in self.data.values():
                 info_strings.append(entry[0] + ": " + entry[1] + " +" + str(entry[2]))

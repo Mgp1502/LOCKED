@@ -34,9 +34,10 @@ def save_keys():
     # check stored player, if none then use ""
     player = json_util.load_player(SAVE_FILE)
     for locked_path in locked_out_paths:
-        lua_data = lua_extracting.extract(locked_path, check_names=True)
+        lua_data = lua_extracting.extractkeys(locked_path, check_names=True)
         for key in lua_data:
-            API_connector.insert_key(key, player)
+            highest_done = lua_extracting.extract_highest_weekly_key(key[0], locked_path)
+            API_connector.post_key(key, player, highest_done)
 
 
 if __name__ == '__main__':
