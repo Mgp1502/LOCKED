@@ -1,14 +1,13 @@
-import threading
-
 import wx.adv
 import wx
 import os
 import lua_extracting
 import json_util as util
+import background
 
 TRAY_TOOLTIP = 'L.O.C.K.E.D'
 TRAY_ICON = 'icon.png'
-save_file = 'save_file.json'
+SAVE_FILE = 'save_file.json'
 
 
 def create_menu_item(menu, label, func):
@@ -17,12 +16,13 @@ def create_menu_item(menu, label, func):
     menu.Append(item)
     return item
 
+window_size = (1000, 700)
 
 class mainWindow(wx.Frame):
-    info_strings = []
     data = {}
     data_list = []
     savedPath = ''
+    savedPlayer = ''
     name = "main"
     def __init__(self):
         self.instance = wx.SingleInstanceChecker(self.name)
@@ -30,48 +30,90 @@ class mainWindow(wx.Frame):
             wx.MessageBox("Another instance is running", "ERROR")
             return
         wx.Frame.__init__(self, None, wx.ID_ANY, 'L.O.C.K.E.D',
-                          pos=(100, 100), size=(680, 550))
+                          pos=(100, 100), size=window_size)
+        wx.Window.SetMinSize(self, size=window_size)
+        wx.Window.SetMaxSize(self, size=window_size)
 
-        self.button1 = wx.Button(self, id=-1, label='Find characters',
-                                 pos=(10, 80), size=(100, 30))
+        #=============BACKGROUND STUFF=============
+        img = wx.Image("Vulpera.jpg")
+        img = img.Scale(window_size[0], window_size[1], wx.IMAGE_QUALITY_HIGH)
+        self.BgBitmap = wx.Bitmap(img)
+        #self.BgBitmap = wx.Bitmap("Vulpera.jpg")
+
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self._OnEraseBackground)
+
+
+        self.button1 = wx.Button(self, id=-1, label='Save info and find characters',
+                                 pos=(10, 120), size=(200, 30))
 
         self.button1.Bind(wx.EVT_BUTTON, self.find_characters)
 
-        self.track_label = wx.StaticText(self, pos=(10, 20), label="Select your WoW directory:")
+        font = wx.Font(14, wx.DECORATIVE, wx.NORMAL, wx.NORMAL)
+        self.top_label = wx.StaticText(self, pos=(10, 15), label="Select your WoW directory:")
+        self.top_label.SetBackgroundColour('white')
+        self.top_label.SetFont(font)
+
         self.dirPicker = wx.DirPickerCtrl(self, size=(500, -1),  pos=(10, 40), message="select WoW directory")
         self.dirPicker.TextCtrl.SetSize((400, -1))
         self.dirPicker.PickerCtrl.SetPosition((410, 0))
 
-        self.check_label = wx.StaticText(self, pos=(10, 120), label="Chars found in WoW directory:")
-        self.checkList = wx.CheckListBox(self, size=(300, 250), pos=(10, 150))
+        self.check_label = wx.StaticText(self, pos=(10, 160), label="Chars found in WoW directory:")
+        self.check_label.SetBackgroundColour('white')
+        self.check_label.SetFont(font)
+
+        self.checkList = wx.CheckListBox(self, size=(300, 250), pos=(10, 190))
         # Load saved path from json and make default
-        self.savedPath = util.load_path(save_file)
+        self.savedPath = util.load_path(SAVE_FILE)
         if self.savedPath != "":
             self.dirPicker.SetPath(self.savedPath)
 
+
+        self.player_name = wx.TextCtrl(self, id=-1, size=(140, -1), pos=(10, 80))
+        self.player_name.SetHint("Player name")
+        self.savedPlayer = util.load_player(SAVE_FILE)
+        if self.savedPlayer != '':
+            self.player_name.SetValue(self.savedPlayer)
+
+
         self.button2 = wx.Button(self, id=-1, label='Save selected chars',
-                                 pos=(10, 410), size=(150, 30))
+                                 pos=(10, 450), size=(150, 30))
 
         self.button2.Bind(wx.EVT_BUTTON, self.save_selected)
 
-        tracked_chars = util.load_chars(save_file)
+        tracked_chars = util.load_chars(SAVE_FILE)
 
-        self.track_label = wx.StaticText(self, pos=(350, 120), label="Currently tracked chars:")
-        self.track_list = wx.ListBox(self, size=(300, 250), pos=(350, 150), choices=tracked_chars)
+        self.track_label = wx.StaticText(self, pos=(650, 160), label="Currently tracked chars:")
+        self.track_label.SetBackgroundColour('white')
+        self.track_label.SetFont(font)
+
+        self.track_list = wx.ListBox(self, size=(300, 250), pos=(650, 190), choices=tracked_chars)
 
         self.Raise()
         self.Show(True)
 
+    def _OnEraseBackground(self, event):
+        EraseDC = event.GetDC()
+        if EraseDC is None:
+            EraseDC = wx.ClientDC(self)
+
+        MemoryDC = wx.MemoryDC()
+        MemoryDC.SelectObject(self.BgBitmap)
+        EraseDC.Blit(0, 0, self.BgBitmap.GetWidth(),
+                     self.BgBitmap.GetHeight(), MemoryDC, 0, 0)
+        MemoryDC.SelectObject(wx.NullBitmap)
+
 
     def find_characters(self, event):
-        self.checkList.Destroy()
         # for each account in wow folder, find locked_out file and parse to extracting.
         folder_path = self.dirPicker.GetPath()
 
-        # save path in json file,
-        util.save_path(folder_path, save_file)
-        folder_path = os.path.join(folder_path, "_retail_", "WTF", "Account")
+        # save path
+        util.save_path(folder_path, SAVE_FILE)
+        # save player name
+        player = self.player_name.GetValue()
+        util.save_player(player, SAVE_FILE)
 
+        folder_path = os.path.join(folder_path, "_retail_", "WTF", "Account")
         locked_out_paths = []
 
         for dir in os.walk(folder_path):
@@ -79,15 +121,15 @@ class mainWindow(wx.Frame):
             if os.path.exists(locked_out_file):
                 locked_out_paths.append(locked_out_file)
 
-        self.info_strings = []
+        info_strings = []
         for path in locked_out_paths:
             for res in lua_extracting.extract(path):
                 self.data[res[0]] = res
             for entry in self.data.values():
-                self.info_strings.append(entry[0] + ": " + entry[1] + " +" + str(entry[2]))
+                info_strings.append(entry[0] + ": " + entry[1] + " +" + str(entry[2]))
 
         self.data_list = list(self.data.values())
-        self.checkList = wx.CheckListBox(self, pos=(10, 150), size=(300, 250), choices=self.info_strings)
+        self.checkList.Set(info_strings)
         print(self.dirPicker.GetPath())
 
     def save_selected(self, event):
@@ -97,10 +139,14 @@ class mainWindow(wx.Frame):
         for item in items:
             to_be_saved.append(self.data_list[item][0])
         # save in lua file.
-        util.save_chars(to_be_saved, save_file)
-        wx.MessageBox("Updated your tracked characters!", "Updated")
-        self.track_list.Destroy()
-        self.track_list = wx.ListBox(self, size=(300, 250), pos=(350, 150), choices=to_be_saved)
+        chars_deleted = util.save_chars(to_be_saved, SAVE_FILE)
+        background.save_keys()
+        wx.MessageBox("Updated your tracked characters! \n \nRemoved the following chars: \n"
+                      + '\n'.join(chars_deleted) + '\n' +
+                      '\nStarted tracking: \n'
+                      + '\n'.join(to_be_saved),
+                      "Changes")
+        self.track_list.Set(to_be_saved)
 
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
@@ -124,6 +170,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
     def show(self, event):
         # open new window!
         mainWindow()
+
 
     def on_exit(self, event):
         wx.CallAfter(self.Destroy)
