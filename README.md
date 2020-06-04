@@ -3,7 +3,7 @@ program for tracking info in locked_out (wow addon) data file and update a datab
 
 Install guide:
 - Make sure you have the "LOCKED_OUT" addon installed for your WoW instance (https://www.curseforge.com/wow/addons/lockedout)
-- Download the "LOCKED1.0.zip" file below and extract it.
+- Download the "LOCKED1.0.zip" file and extract it.
 - Start LOCKED.exe (starts in the system tray, click the lock icon to open window).
 
 In the program:
