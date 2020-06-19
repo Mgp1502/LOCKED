@@ -27,6 +27,8 @@ def extractkeys(path="LockedOutTest.lua", server="Twisting Nether", max_lvl=120,
     char_data = json_util.load_chars(SAVE_FILE)
     keys = []
     for character in lua_data[server]:
+        if character is None:
+            continue
         if character["currentLevel"] == max_lvl and (not check_names or (character["charName"] in char_data)):
             for instance in character["instances"]:
                 dungeon = character["instances"][instance]
