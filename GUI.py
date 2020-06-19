@@ -6,9 +6,9 @@ import json_util as util
 import background
 
 TRAY_TOOLTIP = 'L.O.C.K.E.D'
-TRAY_ICON = 'icon.png'
+TRAY_ICON = 'imgs/icon.png'
 SAVE_FILE = 'save_file.json'
-BACKGROUND_IMG = 'Vulpera.jpg'
+BACKGROUND_IMG = 'imgs/vulpera.jpg'
 
 
 def create_menu_item(menu, label, func):

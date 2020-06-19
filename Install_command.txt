@@ -1,1 +1,1 @@
-pyinstaller --noconsole LOCKED.py
+pyinstaller --onefile --noconsole LOCKED.py
