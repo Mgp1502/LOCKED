@@ -1,3 +1,5 @@
+import sys
+
 import wx.adv
 import wx
 import os
@@ -17,14 +19,17 @@ def create_menu_item(menu, label, func):
     menu.Append(item)
     return item
 
+
 window_size = (1000, 700)
 
-class mainWindow(wx.Frame):
+
+class MainWindow(wx.Frame):
     data = {}
     data_list = []
     savedPath = ''
     savedPlayer = ''
     name = "main"
+
     def __init__(self):
         self.instance = wx.SingleInstanceChecker(self.name)
         if self.instance.IsAnotherRunning():
@@ -35,15 +40,14 @@ class mainWindow(wx.Frame):
         wx.Window.SetMinSize(self, size=window_size)
         wx.Window.SetMaxSize(self, size=window_size)
 
-        #=============BACKGROUND STUFF=============
+        # =============BACKGROUND STUFF=============
         img = wx.Image(BACKGROUND_IMG)
         img = img.Scale(window_size[0], window_size[1], wx.IMAGE_QUALITY_HIGH)
         self.BgBitmap = wx.Bitmap(img)
 
-        self.Bind(wx.EVT_ERASE_BACKGROUND, self._OnEraseBackground)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.on_erase_background)
 
-
-        self.button1 = wx.Button(self, id=-1, label='Save info and find characters',
+        self.button1 = wx.Button(self, id=-1, label='Save info and search for characters',
                                  pos=(10, 120), size=(200, 30))
 
         self.button1.Bind(wx.EVT_BUTTON, self.find_characters)
@@ -67,13 +71,11 @@ class mainWindow(wx.Frame):
         if self.savedPath != "":
             self.dirPicker.SetPath(self.savedPath)
 
-
         self.player_name = wx.TextCtrl(self, id=-1, size=(140, -1), pos=(10, 80))
         self.player_name.SetHint("Player name")
         self.savedPlayer = util.load_player(SAVE_FILE)
         if self.savedPlayer != '':
             self.player_name.SetValue(self.savedPlayer)
-
 
         self.button2 = wx.Button(self, id=-1, label='Save selected chars',
                                  pos=(10, 450), size=(150, 30))
@@ -91,17 +93,16 @@ class mainWindow(wx.Frame):
         self.Raise()
         self.Show(True)
 
-    def _OnEraseBackground(self, event):
+    def on_erase_background(self, event):
         EraseDC = event.GetDC()
         if EraseDC is None:
             EraseDC = wx.ClientDC(self)
 
-        MemoryDC = wx.MemoryDC()
-        MemoryDC.SelectObject(self.BgBitmap)
+        memory_dc = wx.MemoryDC()
+        memory_dc.SelectObject(self.BgBitmap)
         EraseDC.Blit(0, 0, self.BgBitmap.GetWidth(),
-                     self.BgBitmap.GetHeight(), MemoryDC, 0, 0)
-        MemoryDC.SelectObject(wx.NullBitmap)
-
+                     self.BgBitmap.GetHeight(), memory_dc, 0, 0)
+        memory_dc.SelectObject(wx.NullBitmap)
 
     def find_characters(self, event):
         # for each account in wow folder, find locked_out file and parse to extracting.
@@ -122,15 +123,17 @@ class mainWindow(wx.Frame):
                 locked_out_paths.append(locked_out_file)
 
         info_strings = []
+        key_results = set()  # set of keys
         for path in locked_out_paths:
             for res in lua_extracting.extractkeys(path):
-                self.data[res[0]] = res
-            for entry in self.data.values():
-                info_strings.append(entry[0] + ": " + entry[1] + " +" + str(entry[2]))
+                key_results.add(res)  # since its a set it auto check for duplicate entries
+
+        for key_tuple in key_results:
+            self.data[key_tuple[0]] = key_tuple
+            info_strings.append(key_tuple[0] + ": " + key_tuple[1] + " +" + str(key_tuple[2]))
 
         self.data_list = list(self.data.values())
         self.checkList.Set(info_strings)
-        print(self.dirPicker.GetPath())
 
     def save_selected(self, event):
         # find selected from self.dirPicker.
@@ -151,6 +154,12 @@ class mainWindow(wx.Frame):
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
     def __init__(self, frame):
+        self.name = "LOCKED TASKBAR"
+        self.instance = wx.SingleInstanceChecker(self.name)
+        if self.instance.IsAnotherRunning():
+            wx.MessageBox("Another instance is running", "ERROR")
+            sys.exit(0)
+            return
         self.frame = frame
         super(TaskBarIcon, self).__init__()
         self.set_icon(TRAY_ICON)
@@ -169,8 +178,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
 
     def show(self, event):
         # open new window!
-        mainWindow()
-
+        MainWindow()
 
     def on_exit(self, event):
         wx.CallAfter(self.Destroy)
@@ -187,6 +195,8 @@ class App(wx.App):
 
 def main():
     app = App(False)
+    if not util.save_file_exist(SAVE_FILE):
+        MainWindow()
     app.MainLoop()
 
 

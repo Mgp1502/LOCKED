@@ -18,6 +18,17 @@ def save_json(data, filename):
         json.dump(data, outfile)
 
 
+def save_file_exist(filename):
+    # check if save_file exists and doe snot contain an empty path.
+    if os.path.exists(filename):
+        with open(filename) as json_file:
+            data = json.load(json_file)
+            if 'path' in data.keys():
+                if data['path'] is not "":
+                    return True
+    return False
+
+
 def load_chars(filename):
     data = load_json(filename)
     if 'chars' in data.keys():
@@ -35,6 +46,7 @@ def load_path(filename):
 
 
 def load_player(filename):
+    # check stored player, if none then use ""
     data = load_json(filename)
     if 'player' in data.keys():
         return data['player'] or ""

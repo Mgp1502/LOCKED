@@ -14,7 +14,7 @@ def getLuaObject(path):
     return lua.decode(code)
 
 
-def extractkeys(path="LockedOutTest.lua", server="Twisting Nether", max_lvl=120, check_names=False):
+def extractkeys(path, server="Twisting Nether", max_lvl=120, check_names=False):
     """
 
     :param path: path to lockedOut datafile, found under WTF,
@@ -40,7 +40,7 @@ def extractkeys(path="LockedOutTest.lua", server="Twisting Nether", max_lvl=120,
     return keys
 
 
-def extract_highest_weekly_key(char_name, path="LockedOutTest.lua", server="Twisting Nether"):
+def extract_highest_weekly_key(char_name, path, server="Twisting Nether"):
     lua_data = getLuaObject(path)
     highest_key = 0
 
@@ -52,9 +52,10 @@ def extract_highest_weekly_key(char_name, path="LockedOutTest.lua", server="Twis
                     diff_level = dungeon["mythicbest"]["difficulty"]
                     if diff_level > highest_key:
                         highest_key = diff_level
-
-    return highest_key
-
+            # found the char so no need to look through the rest
+            return highest_key
+    # if the char was not found, just return 0
+    return 0
 
 
 
