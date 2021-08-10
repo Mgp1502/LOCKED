@@ -39,7 +39,7 @@ def save_keys():
     for locked_path in find_lua_files():
         lua_data = lua_extracting.extractkeys(locked_path, check_names=True)
         for key in lua_data:
-            highest_done = lua_extracting.extract_highest_weekly_key(key[0], locked_path)
+            highest_done = lua_extracting.extract_highest_weekly_key()
             API_connector.post_key(key, player, highest_done)
 
 
@@ -53,7 +53,7 @@ def find_lua_files():
         if dir[0] == "SavedVariables":
             continue
         else:
-            locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "LockedOut.lua")
+            locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "AB_Locked.lua")
             if os.path.exists(locked_out_file):
                 locked_out_paths.append(locked_out_file)
     return locked_out_paths

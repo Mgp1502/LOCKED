@@ -118,7 +118,7 @@ class MainWindow(wx.Frame):
         locked_out_paths = []
 
         for dir in os.walk(folder_path):
-            locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "LockedOut.lua")
+            locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "AB_Locked.lua")
             if os.path.exists(locked_out_file):
                 locked_out_paths.append(locked_out_file)
 

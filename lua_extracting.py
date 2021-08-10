@@ -3,60 +3,35 @@ import json_util
 
 SAVE_FILE = "save_file.json"
 
+
 def getLuaObject(path):
     f = open(path, "r", encoding="utf-8")
     next(f)  # skip first line
     code = f.read()
-    # ignore first 12 chars to remove the "LockoutDb = "
-    code = code[12:]
-
-    # decode the lua.
+    # ignore the chars untill first '{' is encountered
+    code = code[code.find('{'):]
     return lua.decode(code)
 
 
-def extractkeys(path, server="Twisting Nether", max_lvl=120, check_names=False):
+def extractkeys(path, check_names=False):
     """
-
-    :param path: path to lockedOut datafile, found under WTF,
-    :param server: which server to look at
-    :param max_lvl: the current max lvl of the expansion
+    Extracts keys information from a LUA datafile
+    :param path: path to datafile, found under WTF
     :return: List of tuples containing (char_name, instance, key_level)
 
     """
     lua_data = getLuaObject(path)
-    char_data = json_util.load_chars(SAVE_FILE)
+    saved_characters = json_util.load_chars(SAVE_FILE)
     keys = []
-    for character in lua_data[server]:
-        if character is None:
-            continue
-        if character["currentLevel"] == max_lvl and (not check_names or (character["charName"] in char_data)):
-            for instance in character["instances"]:
-                dungeon = character["instances"][instance]
-                if "keystone" in dungeon:
-                    diff_level = dungeon["keystone"]["difficulty"]
-                    # print(character["charName"] + ": " + instance + " +" + str(diff_level))
-                    keys.append((character["charName"], instance, diff_level))
-                    break
+    characters = lua_data['Characters']
+    for character_name in characters:
+        values = lua_data['Characters'][character_name]
+
+        if values["KeystoneLevel"] > 0:
+            dungeon = values["Keystone"]
+            diff_level = values["KeystoneLevel"]
+            keys.append((character_name, dungeon, diff_level))
     return keys
 
-
-def extract_highest_weekly_key(char_name, path, server="Twisting Nether"):
-    lua_data = getLuaObject(path)
-    highest_key = 0
-
-    for character in lua_data[server]:
-        if character["charName"] == char_name:
-            for instance in character["instances"]:
-                dungeon = character["instances"][instance]
-                if "mythicbest" in dungeon:
-                    diff_level = dungeon["mythicbest"]["difficulty"]
-                    if diff_level > highest_key:
-                        highest_key = diff_level
-            # found the char so no need to look through the rest
-            return highest_key
-    # if the char was not found, just return 0
+def extract_highest_weekly_key():
     return 0
-
-
-
-
