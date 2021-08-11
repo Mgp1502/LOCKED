@@ -19,7 +19,7 @@ def start():
         # TODO
         reset = check_if_need_of_reset()
         if not reset:
-            save_keys()
+            save_keys_to_db()
         time.sleep(300)  # sleep 5 min
 
 
@@ -34,7 +34,7 @@ def check_if_need_of_reset():
     return False
 
 
-def save_keys():
+def save_keys_to_db():
     player = json_util.load_player(SAVE_FILE)
     for locked_path in find_lua_files():
         lua_data = lua_extracting.extractkeys(locked_path, check_names=True)

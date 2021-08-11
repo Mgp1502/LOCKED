@@ -29,7 +29,7 @@ def save_file_exist(filename):
     return False
 
 
-def load_chars(filename):
+def load_tracked_characters(filename):
     data = load_json(filename)
     if 'chars' in data.keys():
         return data['chars'] or []
@@ -69,7 +69,7 @@ def save_player(player, filename):
 
 def save_chars(char_names, filename):
     # delete the now not tracked chars from the DB
-    old_chars = set(load_chars(filename))
+    old_chars = set(load_tracked_characters(filename))
     new_chars = set(char_names)
     chars_to_delete = old_chars.difference(new_chars)
 

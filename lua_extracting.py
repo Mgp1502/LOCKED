@@ -21,10 +21,14 @@ def extractkeys(path, check_names=False):
 
     """
     lua_data = getLuaObject(path)
-    saved_characters = json_util.load_chars(SAVE_FILE)
+    tracked_characters = json_util.load_tracked_characters(SAVE_FILE)
     keys = []
     characters = lua_data['Characters']
     for character_name in characters:
+        if check_names:
+            if character_name not in tracked_characters:
+                continue
+
         values = lua_data['Characters'][character_name]
 
         if values["KeystoneLevel"] > 0:

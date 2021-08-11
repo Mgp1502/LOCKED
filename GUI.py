@@ -82,7 +82,7 @@ class MainWindow(wx.Frame):
 
         self.button2.Bind(wx.EVT_BUTTON, self.save_selected)
 
-        tracked_chars = util.load_chars(SAVE_FILE)
+        tracked_chars = util.load_tracked_characters(SAVE_FILE)
 
         self.track_label = wx.StaticText(self, pos=(650, 160), label="Currently tracked chars:")
         self.track_label.SetBackgroundColour('white')
@@ -143,7 +143,7 @@ class MainWindow(wx.Frame):
             to_be_saved.append(self.data_list[item][0])
         # save in lua file.
         chars_deleted = util.save_chars(to_be_saved, SAVE_FILE)
-        background.save_keys()
+        background.save_keys_to_db()
         wx.MessageBox("Updated your tracked characters! \n \nRemoved the following chars: \n"
                       + '\n'.join(chars_deleted) + '\n' +
                       '\nStarted tracking: \n'
