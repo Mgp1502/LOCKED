@@ -7,6 +7,8 @@ import lua_extracting
 import json_util as util
 import background
 
+VERSION = 'v.1.2.2'
+
 TRAY_TOOLTIP = 'L.O.C.K.E.D'
 TRAY_ICON = 'imgs/icon.png'
 SAVE_FILE = 'save_file.json'
@@ -35,7 +37,7 @@ class MainWindow(wx.Frame):
         if self.instance.IsAnotherRunning():
             wx.MessageBox("Another instance is running", "ERROR")
             return
-        wx.Frame.__init__(self, None, wx.ID_ANY, 'L.O.C.K.E.D',
+        wx.Frame.__init__(self, None, wx.ID_ANY, 'L.O.C.K.E.D' + ' (' + VERSION + ')',
                           pos=(100, 100), size=window_size)
         wx.Window.SetMinSize(self, size=window_size)
         wx.Window.SetMaxSize(self, size=window_size)
