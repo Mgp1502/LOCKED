@@ -46,17 +46,17 @@ def save_keys_to_db():
 def find_lua_files():
     path = json_util.load_path(SAVE_FILE)
 
-    folder_path = os.path.join(path, "_retail_", "WTF", "Account")
-    locked_out_paths = []
+    account_path = os.path.join(path, "_retail_", "WTF", "Account")
+    locked_paths = []
 
-    for dir in os.walk(folder_path):
-        if dir[0] == "SavedVariables":
+    for directory in os.walk(account_path):
+        if directory[0] == "SavedVariables":
             continue
         else:
-            locked_out_file = os.path.join(folder_path, dir[0], "SavedVariables", "AB_Locked.lua")
+            locked_out_file = os.path.join(account_path, directory[0], "SavedVariables", "AB_Locked.lua")
             if os.path.exists(locked_out_file):
-                locked_out_paths.append(locked_out_file)
-    return locked_out_paths
+                locked_paths.append(locked_out_file)
+    return locked_paths
 
 
 if __name__ == '__main__':

@@ -195,7 +195,7 @@ class App(wx.App):
 
 def main():
     app = App(False)
-    if not util.save_file_exist(SAVE_FILE):
+    if not util.save_file_exist_with_path(SAVE_FILE):
         MainWindow()
     app.MainLoop()
 

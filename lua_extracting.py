@@ -23,7 +23,11 @@ def extractkeys(path, check_names=False):
     lua_data = getLuaObject(path)
     tracked_characters = json_util.load_tracked_characters(SAVE_FILE)
     keys = []
-    characters = lua_data['Characters']
+    characters = []
+    try:
+        characters = lua_data['Characters']
+    except KeyError:
+        print("no characters found in -> " + path)
     for character_name in characters:
         if check_names:
             if character_name not in tracked_characters:
